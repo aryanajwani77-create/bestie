@@ -9,6 +9,7 @@
             --bg-color: #fff0f3; 
             --accent-color: #ff4d6d; 
             --soft-pink: #ff85a1;
+            --wa-green: #25D366;
         }
 
         body { 
@@ -23,7 +24,6 @@
             touch-action: manipulation; 
         }
 
-        /* Floating background sparkles */
         .sparkle {
             position: absolute;
             background: white;
@@ -39,7 +39,6 @@
 
         .container { text-align: center; cursor: pointer; z-index: 10; }
 
-        /* Smoother Heartbeat */
         .envelope { 
             font-size: 110px; 
             filter: drop-shadow(0 10px 15px rgba(255, 77, 109, 0.3));
@@ -51,7 +50,6 @@
             50% { transform: scale(1.1) rotate(3deg); } 
         }
 
-        /* Card Styling */
         #message-box { 
             display: none; 
             background: white; 
@@ -63,22 +61,15 @@
             animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
 
-        img { 
-            width: 100%; 
-            border-radius: 25px; 
-            margin: 15px 0; 
-            display: block; 
-            border: 2px solid var(--bg-color);
-        }
+        img { width: 100%; border-radius: 25px; margin: 15px 0; display: block; border: 2px solid var(--bg-color); }
 
         h2 { color: var(--accent-color); font-size: 24px; margin: 0; }
         p { color: #6d5b5e; font-size: 1.1em; line-height: 1.5; }
 
-        /* Bouncy I Love You */
         #final-popup { 
             display: none; 
             position: fixed; 
-            top: 50%; 
+            top: 40%; 
             left: 50%; 
             transform: translate(-50%, -50%); 
             background: var(--accent-color); 
@@ -92,19 +83,28 @@
             animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
-        .heart { 
-            position: absolute; 
-            pointer-events: none;
-            animation: floatUp 3.5s ease-out forwards; 
+        /* WhatsApp Button */
+        #reply-btn {
+            display: none;
+            position: fixed;
+            bottom: 50px;
+            background-color: var(--wa-green);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            z-index: 110;
+            animation: slideUp 0.5s ease;
         }
 
-        @keyframes floatUp { 
-            0% { transform: translateY(0) scale(1); opacity: 1; } 
-            100% { transform: translateY(-110vh) scale(1.5) rotate(45deg); opacity: 0; } 
-        }
-
+        @keyframes slideUp { from { transform: translateY(100px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
         @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes bounceIn { from { transform: translate(-50%, -50%) scale(0); } to { transform: translate(-50%, -50%) scale(1); } }
+
+        .heart { position: absolute; pointer-events: none; animation: floatUp 3.5s ease-out forwards; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(1); opacity: 1; } 100% { transform: translateY(-110vh) scale(1.5); opacity: 0; } }
     </style>
 </head>
 <body>
@@ -113,7 +113,59 @@
         <source src="song.mp3" type="audio/mpeg">
     </audio>
 
+    <div class="container" onclick="start()">
+        <div id="envelope-icon" class="envelope">💌</div>
+        <div id="message-box">
+            <h2>Heyy Rishika! ✨</h2>
+            <img src="me.jpeg"> 
+            <p>I just wanted to make something small and cute for you... 🌸</p>
+            <p style="font-size: 0.85em; color: var(--soft-pink); font-weight: bold;">(Tap again for a surprise!)</p>
+        </div>
+    </div>
+
+    <div id="final-popup">I love you! ❤️</div>
+    
+    <a href="#" id="reply-btn" target="_blank">Reply to him! 📱</a>
+
     <script>
+        // CHANGE THIS TO YOUR NUMBER (with country code, no +)
+        const yourPhoneNumber = "919310629581"; 
+        const messageText = "I just saw your surprise! I love you too ❤️";
+
+        let clicks = 0;
+        function start() {
+            let music = document.getElementById('mySong');
+            if (clicks === 0) {
+                music.currentTime = 120;
+                music.play().catch(e => console.log("Audio blocked"));
+                document.getElementById('envelope-icon').style.display = 'none';
+                document.getElementById('message-box').style.display = 'block';
+                spawnHearts();
+            } else {
+                document.getElementById('final-popup').style.display = 'block';
+                const btn = document.getElementById('reply-btn');
+                btn.style.display = 'block';
+                btn.href = `https://wa.me/${yourPhoneNumber}?text=${encodeURIComponent(messageText)}`;
+                spawnHearts();
+            }
+            clicks++;
+        }
+
+        function spawnHearts() {
+            const emojis = ['❤️', '💖', '✨', '🌸'];
+            for (let i = 0; i < 15; i++) {
+                let h = document.createElement('div');
+                h.className = 'heart'; 
+                h.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
+                h.style.left = Math.random() * 100 + 'vw';
+                h.style.top = '100vh';
+                h.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                document.body.appendChild(h);
+                setTimeout(() => h.remove(), 3500);
+            }
+        }
+
+        // Background Sparkles
         for (let i = 0; i < 20; i++) {
             let s = document.createElement('div');
             s.className = 'sparkle';
@@ -122,54 +174,6 @@
             s.style.top = Math.random() * 100 + 'vh';
             s.style.animationDelay = Math.random() * 5 + 's';
             document.body.appendChild(s);
-        }
-    </script>
-
-    <div class="container" onclick="start()">
-        <div id="envelope-icon" class="envelope">💌</div>
-        <div id="message-box">
-            <h2>Heyy Rishika! ✨</h2>
-            <img src="me.jpeg"> 
-            <p>I just wanted to make something small and cute for you🌸,hope you'll like it :)</p>
-            <p style="font-size: 0.85em; color: var(--soft-pink); font-weight: bold;">(Tap again for a surprise!)</p>
-        </div>
-    </div>
-
-    <div id="final-popup">I love you! ❤️</div>
-
-    <script>
-        let clicks = 0;
-        function start() {
-            let music = document.getElementById('mySong');
-            if (clicks === 0) {
-                music.currentTime = 120; // Start at 2:00
-                music.play().catch(e => console.log("Audio blocked"));
-                
-                document.getElementById('envelope-icon').style.display = 'none';
-                document.getElementById('message-box').style.display = 'block';
-                spawnHearts();
-            } else {
-                document.getElementById('final-popup').style.display = 'block';
-                spawnHearts();
-                // Keeps the popup visible for 5 seconds
-                setTimeout(() => { document.getElementById('final-popup').style.display = 'none'; }, 5000);
-            }
-            clicks++;
-        }
-
-        function spawnHearts() {
-            const emojis = ['❤️', '💖', '✨', '🌸', '💘'];
-            for (let i = 0; i < 18; i++) {
-                let h = document.createElement('div');
-                h.className = 'heart'; 
-                h.innerHTML = emojis[Math.floor(Math.random() * emojis.length)];
-                h.style.left = Math.random() * 100 + 'vw';
-                h.style.top = '100vh';
-                h.style.fontSize = (Math.random() * 25 + 15) + 'px';
-                h.style.transition = "all 3s ease-out";
-                document.body.appendChild(h);
-                setTimeout(() => h.remove(), 3500);
-            }
         }
     </script>
 </body>
